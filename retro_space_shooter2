@@ -1,0 +1,119 @@
+#include<stdio.h>
+#include<conio.h>
+#include<stdlib.h>
+#include<unistd.h>
+
+#define WIDTH 20
+#define HEIGHT 10
+
+int spaceshipX = WIDTH / 2;
+int bulletX = -1, bulletY = -1;
+int enemyX, enemyY = 0;
+int score = 0;
+int gameOver = 0;
+
+void clearScreen(){
+    system("cls");
+}
+
+void initEnemy(){
+    enemyX = rand() % WIDTH;
+    enemyY = 0;
+}
+
+void display(){
+    clearScreen();
+
+    for (int i = 0; i < WIDTH + 2; i++) printf("#");
+    printf("\n");
+
+    for (int y = 0; y < HEIGHT; y++){
+        printf("#");
+        for (int x = 0; x < WIDTH; x++) {
+            if (y == HEIGHT - 1 && x == spaceshipX){
+                printf("^");
+            } else if (x == bulletX && y == bulletY){
+                printf("|");
+            } else if (x == enemyX && y == enemyY){
+                printf("E");
+            } else {
+                printf(" ");
+            }
+        }
+        printf("#\n");
+    }
+
+    for (int i = 0; i < WIDTH + 2; i++) printf("#");
+    printf("\n");
+
+    printf("Score: %d\n", score);
+}
+
+void updateBullet(){
+    if (bulletY >= 0){
+        bulletY--;
+        if (bulletY < 0){
+            bulletX = -1;
+        }
+    }
+}
+
+void updateEnemy(){
+    enemyY++;
+    if (enemyY >= HEIGHT){
+        enemyY = 0;
+        enemyX = rand() % WIDTH;
+    }
+}
+
+void checkCollision(){
+    if (bulletX == enemyX && bulletY == enemyY){
+        score += 10;
+        bulletX = -1; 
+        bulletY = -1;
+        enemyY = 0; 
+        enemyX = rand() % WIDTH;
+    }
+}
+
+void moveSpaceship(char direction){
+    if (direction == 'a' && spaceshipX > 0){
+        spaceshipX--;
+    } else if (direction == 'd' && spaceshipX < WIDTH - 1){
+        spaceshipX++;
+    }
+}
+
+void fireBullet(){
+    if (bulletY < 0){
+        bulletX = spaceshipX;
+        bulletY = HEIGHT - 2;
+    }
+}
+
+int main(){
+    initEnemy();
+
+    while (!gameOver){
+        display();
+        updateBullet();
+        updateEnemy();
+        checkCollision();
+
+        if (_kbhit()){
+            char input = _getch();
+            if (input == 'a' || input == 'd'){
+                moveSpaceship(input);
+            } else if (input == ' '){
+                fireBullet();
+            } else if (input == 'q'){
+                gameOver = 1;
+            }
+        }
+        
+        Sleep(100);
+    }
+
+    printf("Game Over! Final Score: %d\n", score);
+    return 0;
+}
